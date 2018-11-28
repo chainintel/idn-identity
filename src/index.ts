@@ -15,21 +15,29 @@ export async function getPeerId(opts: any = {}) {
   if (self.localStorage) {
     id = self.localStorage.getItem('peerId');
     if (!id) {
-      let [err, _id] = await w(p(PeerId, 'create')({ bits: opts.bits || 2048 }));
-      if (err) {
-        throw err;
-      }
-      id = _id.toJSON();
-      self.localStorage.setItem('peerId', JSON.stringify(id));
+      await new Promise((resolve, reject)=>{
+        PeerId.create({ bits: opts.bits || 2048 }, (err, _id)=>{
+          if (err) {
+            reject(err);
+          }
+          id = _id.toJSON();
+          self.localStorage.setItem('peerId', JSON.stringify(id));
+          resolve();
+        })
+      })
     } else {
       id = JSON.parse(id);
     }
   } else {
-    let [err, _id] = await w(p(PeerId, 'create')({ bits: opts.bits || 2048 }));
-    if (err) {
-      throw err;
-    }
-    id = _id.toJSON();
+    await new Promise((resolve, reject)=>{
+      PeerId.create({ bits: opts.bits || 2048 }, (err, _id)=>{
+        if (err) {
+          reject(err);
+        }
+        id = _id.toJSON();
+        resolve();
+      })
+    })
   }
   return id;
 }
